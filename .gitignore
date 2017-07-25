@@ -52,4 +52,5 @@ target/
 littleproxy_cert
 littleproxy_keystore.jks
 littleproxysample.iml
-
+sslkey/
+!.keep
