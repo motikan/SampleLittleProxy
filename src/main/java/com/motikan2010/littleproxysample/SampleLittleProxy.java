@@ -26,15 +26,13 @@ public class SampleLittleProxy {
                 "mykey",    // alias of the private key in the KeyStore; if you did not specify an alias when creating it, use "1"
                 "keypass");
 
-
         ImpersonatingMitmManager mitmManager = ImpersonatingMitmManager.builder()
-                .rootCertificateSource(fileCertificateSource).build();
-
-        SampleHttpFiltersSource sampleHttpFiltersSource = new SampleHttpFiltersSource();
+                .rootCertificateSource(fileCertificateSource)
+                .build();
 
         DefaultHttpProxyServer.bootstrap()
                 .withPort(PORT)
-                .withFiltersSource(sampleHttpFiltersSource)
+                .withFiltersSource(new SampleHttpFiltersSource())
                 .withManInTheMiddle(mitmManager)
                 .withAllowLocalOnly(false)
                 .withName("FilteringProxy")
@@ -79,6 +77,9 @@ public class SampleLittleProxy {
 
             @Override
             public HttpResponse proxyToServerRequest(HttpObject httpObject) {
+                if (httpObject instanceof HttpRequest) {
+                    ((HttpRequest) httpObject).headers().remove("Via");
+                }
                 if(PROXY_TO_SERVER_REQUEST_ENABLE == true){
                     showRequest(httpObject);
                 }
@@ -90,16 +91,17 @@ public class SampleLittleProxy {
                 if(SERVER_TO_PROXY_RESPONSE_ENABLE == true){
                     showResponse(httpObject);
                 }
-
                 return httpObject;
             }
 
             @Override
             public HttpObject proxyToClientResponse(HttpObject httpObject) {
+                if(httpObject instanceof HttpResponse){
+                    ((HttpResponse) httpObject).headers().remove("Via");
+                }
                 if(PROXY_TO_CLIENT_RESPONSE_ENABLE == true){
                     showResponse(httpObject);
                 }
-
                 return httpObject;
             }
 
@@ -155,9 +157,9 @@ public class SampleLittleProxy {
             }
 
             private void showContent(HttpContent httpContent){
-                String resposeBody = httpContent.content().toString(Charset.defaultCharset());
+                String responseBody = httpContent.content().toString(Charset.defaultCharset());
                 System.out.println();
-                System.out.println(resposeBody);
+                System.out.println(responseBody);
             }
 
             @Override
