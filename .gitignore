@@ -54,3 +54,4 @@ littleproxy_keystore.jks
 littleproxysample.iml
 sslkey/
 !.keep
+.DS_Store
